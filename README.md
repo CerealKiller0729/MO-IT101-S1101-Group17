@@ -25,7 +25,6 @@ To run the MotorPH Payroll System, please adhere to the following steps:
 Following these steps will set you up to effectively utilize the MotorPH Payroll System and ensure a seamless payroll management experience.
 
 MO-IT S1101 Group 17 Members:
-1. Belloga, Angelic Dennise
-2. Mesias, Nirey Rose
-3. Rivera, Mae Angelique
-4. Rodriguez, Paola
+1. Mesias, Nirey Rose
+2. Rivera, Mae Angelique
+3. Rodriguez, Paola
