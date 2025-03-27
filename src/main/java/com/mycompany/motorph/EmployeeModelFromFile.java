@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date; 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class EmployeeModelFromFile {
@@ -30,8 +32,17 @@ public class EmployeeModelFromFile {
                 List<String> rowData = new ArrayList<>();
                 for (Cell cell : row) {
                     switch (cell.getCellType()) {
-                        case STRING -> rowData.add(cell.getStringCellValue());
-                        case NUMERIC -> rowData.add(String.valueOf(cell.getNumericCellValue()));
+                         case STRING -> rowData.add(cell.getStringCellValue().trim());
+                        case NUMERIC -> {
+                              if (DateUtil.isCellDateFormatted(cell)) {
+                                Date date = cell.getDateCellValue();
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy"); // Format as mm/dd/yyyy
+                                rowData.add(dateFormat.format(date));
+                            } else {
+                                // Read as string to avoid scientific notation
+                                rowData.add(String.valueOf((long) cell.getNumericCellValue())); // Cast to long to avoid decimals
+                            }
+                        }
                         default -> rowData.add("");
                     }
                 }
