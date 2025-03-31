@@ -13,18 +13,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class AttendanceRecord {
+    // Attributes to store employee attendance details
     private String name;
     private String id;
     private LocalDate date;
     private LocalTime timeIn;
     private LocalTime timeOut;
+
+    // Constants for file path and formatting
     private static final String XLSX_FILE_PATH = "src/main/resources/AttendanceRecord.xlsx";
     private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    // Collection to store attendance records
     public static ArrayList<AttendanceRecord> attendanceRecords = new ArrayList<>();
 
+    // Constructor to initialize an AttendanceRecord object
     public AttendanceRecord(String name, String id, LocalDate date, LocalTime timeIn, LocalTime timeOut) {
         this.name = name;
         this.id = id;
@@ -33,6 +38,7 @@ public class AttendanceRecord {
         this.timeOut = timeOut;
     }
 
+    // Constructor to initialize an AttendanceRecord from an array of data
     public AttendanceRecord(String[] data) {
         if (data.length < 6) {
             throw new IllegalArgumentException("Insufficient data to create AttendanceRecord");
@@ -46,6 +52,7 @@ public class AttendanceRecord {
 
     public AttendanceRecord() {}
 
+    // Method to load attendance records from an Excel file
     public static void loadAttendanceFromExcel(String filePath) {
         try {
             attendanceRecords = loadAttendance(filePath);
@@ -55,6 +62,7 @@ public class AttendanceRecord {
         }
     }
 
+    // Method to read and parse attendance records from an Excel file
     public static ArrayList<AttendanceRecord> loadAttendance(String filePath) throws IOException {
         ArrayList<AttendanceRecord> attendanceRecords = new ArrayList<>();
 
@@ -63,6 +71,7 @@ public class AttendanceRecord {
 
             Sheet sheet = workbook.getSheetAt(0);
 
+            // Iterate through rows, skipping header row
             for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex);
                 if (row != null) {
@@ -74,6 +83,7 @@ public class AttendanceRecord {
                     LocalTime timeIn = parseTime(row.getCell(4));
                     LocalTime timeOut = parseTime(row.getCell(5));
 
+                    // Skip records with missing time values
                     if (timeIn == null || timeOut == null) {
                         System.out.println("Skipping record with missing time values: " + id);
                         continue;
@@ -87,6 +97,7 @@ public class AttendanceRecord {
         return attendanceRecords;
     }
 
+    // Method to parse a date value from an Excel cell
     private static LocalDate parseDate(Cell cell) {
         if (cell == null) {
             System.err.println("Date cell is null.");
@@ -111,6 +122,7 @@ public class AttendanceRecord {
         }
     }
 
+    // Method to parse a time value from an Excel cell
     private static LocalTime parseTime(Cell cell) {
         if (cell == null) {
             System.err.println("Time cell is null.");
@@ -142,6 +154,7 @@ public class AttendanceRecord {
         }
     }
 
+    // Method to get the value of an Excel cell as a string
     private static String getCellValueAsString(Cell cell) {
         if (cell == null) {
             return "";
@@ -155,6 +168,7 @@ public class AttendanceRecord {
         };
     }
 
+    // Method to calculate the number of hours worked in a day
     public double calculateHoursWorked() {
         if (timeIn == null || timeOut == null) {
             System.err.println("TimeIn or TimeOut is null for record: " + id);
@@ -162,13 +176,14 @@ public class AttendanceRecord {
         }
         Duration duration;
         if (timeOut.isBefore(timeIn)) {
-            duration = Duration.between(timeIn, timeOut.plusHours(24));
+            duration = Duration.between(timeIn, timeOut.plusHours(24)); // Handles overnight shifts
         } else {
             duration = Duration.between(timeIn, timeOut);
         }
         return duration.toHours() + (duration.toMinutes() % 60) / 60.0;
     }
 
+    // Method to calculate total hours worked in a specific week
     public static double calculateTotalHours(int year, int month, String employeeID, int week) {
         double totalHours = 0;
 
@@ -188,11 +203,12 @@ public class AttendanceRecord {
         return totalHours;
     }
 
+    // Method to determine which week of the month a date belongs to
     public static int getWeekOfMonth(LocalDate date) {
         return ((date.getDayOfMonth() - 1) / 7) + 1;
     }
 
-    // Getters
+    // Getters for class attributes
     public String getName() { return name; }
     public String getId() { return id; }
     public LocalDate getDate() { return date; }
