@@ -23,8 +23,9 @@ public class Grosswage extends Calculation {
     private double overtimePay;
     private double holidayPay;
 
+    // Constructor
     public Grosswage(String empId, String firstName, String lastName, int year, 
-                   int month, int week, LocalTime shiftStartTime, boolean nightShift) {
+                     int month, int week, LocalTime shiftStartTime, boolean nightShift) {
         if (empId == null || empId.trim().isEmpty()) {
             throw new IllegalArgumentException("Employee ID cannot be null or empty");
         }
@@ -44,6 +45,7 @@ public class Grosswage extends Calculation {
             throw new IllegalArgumentException("Shift start time cannot be null");
         }
 
+        // Initialize fields
         this.employeeID = empId;
         this.employeeName = firstName + " " + lastName;
         this.year = year;
@@ -53,33 +55,41 @@ public class Grosswage extends Calculation {
         this.nightShift = nightShift;
     }
 
+    // Override the calculate method to compute gross pay
     @Override
     public double calculate() {
+        // Get the list of employees from the model
         List<Employee> employees = EmployeeModelFromFile.getEmployeeModelList();
         Employee employee = findEmployeeById(employeeID, employees);
-        
+
+        // Check if employee exists
         if (employee == null) {
             throw new IllegalStateException("Employee ID " + employeeID + " not found");
         }
 
+        // Set hourly rate from employee details
         hourlyRate = employee.getHourlyRate();
         if (hourlyRate <= 0) {
             throw new IllegalStateException("Invalid hourly rate for employee");
         }
 
+        // Calculate the total hours worked in the target week
         hoursWorked = calculateWeeklyHoursWorked();
         if (hoursWorked < 0) {
             throw new IllegalStateException("Invalid hours worked calculation");
         }
 
+        // Calculate pay including holiday rates
         calculatePayWithHolidayRates();
         gross = regularPay + overtimePay;
         
+        // Validate the holiday pay to prevent overpaying
         validateHolidayPay();
         
         return gross;
     }
 
+    // Method to calculate the total hours worked for the target week
     private double calculateWeeklyHoursWorked() {
         double totalHours = 0;
         List<AttendanceRecord> records = AttendanceRecord.getAttendanceRecords();
@@ -92,6 +102,7 @@ public class Grosswage extends Calculation {
         return totalHours;
     }
 
+    // Check if the record date is in the target week
     private boolean isDateInTargetWeek(LocalDate date) {
         if (date.getYear() != year || date.getMonthValue() != month) {
             return false;
@@ -100,6 +111,7 @@ public class Grosswage extends Calculation {
         return weekOfMonth == week;
     }
 
+    // Calculate the pay considering holiday rates
     private void calculatePayWithHolidayRates() {
         resetCounters();
         List<AttendanceRecord> records = AttendanceRecord.getAttendanceRecords();
@@ -111,6 +123,7 @@ public class Grosswage extends Calculation {
         }
     }
 
+    // Reset the pay and hour counters before starting the calculation
     private void resetCounters() {
         regularHours = 0;
         overtimeHours = 0;
@@ -119,12 +132,14 @@ public class Grosswage extends Calculation {
         holidayPay = 0;
     }
 
+    // Process daily hours to apply pay rates
     private void processDailyHours(AttendanceRecord record) {
         LocalDate recordDate = record.getDate();
         double dailyHours = record.calculateHoursWorked();
         double dayRegular = Math.min(dailyHours, 8.0);
         double dayOvertime = Math.max(0, dailyHours - 8.0);
 
+        // Apply holiday rates if the day is a holiday
         if (HolidayChecker.isHoliday(recordDate)) {
             applyHolidayRates(recordDate, dayRegular, dayOvertime);
         } else {
@@ -132,6 +147,7 @@ public class Grosswage extends Calculation {
         }
     }
 
+    // Apply holiday rates for regular and overtime hours
     private void applyHolidayRates(LocalDate date, double regularHrs, double overtimeHrs) {
         double multiplier = HolidayChecker.getHolidayPayMultiplier(date);
         double holidayPremiumRate = multiplier - 1.0;
@@ -152,6 +168,7 @@ public class Grosswage extends Calculation {
         overtimeHours += overtimeHrs;
     }
 
+    // Apply regular pay rates for normal working days
     private void applyRegularRates(double regularHrs, double overtimeHrs) {
         regularPay += regularHrs * hourlyRate;
         
@@ -164,6 +181,7 @@ public class Grosswage extends Calculation {
         overtimeHours += overtimeHrs;
     }
 
+    // Validate holiday pay to ensure it does not exceed the maximum allowable premium
     private void validateHolidayPay() {
         double maxExpectedPremium = (regularHours + overtimeHours) * hourlyRate * 1.3;
         if (holidayPay > maxExpectedPremium) {
@@ -173,7 +191,7 @@ public class Grosswage extends Calculation {
         }
     }
 
-    // Getters
+    // Getters for the calculated fields
     public double getRegularHours() { return regularHours; }
     public double getOvertimeHours() { return overtimeHours; }
     public double getRegularPay() { return regularPay; }
@@ -189,13 +207,15 @@ public class Grosswage extends Calculation {
     public LocalTime getShiftStartTime() { return shiftStartTime; }
     public boolean isNightShift() { return nightShift; }
 
+    // Find employee by ID from the list of employees
     private Employee findEmployeeById(String employeeId, List<Employee> employees) {
         return employees.stream()
             .filter(e -> e != null && e.getEmployeeNumber().equals(employeeId))
             .findFirst()
             .orElse(null);
     }
-    
+
+    // Print detailed calculation of wages
     public void printCalculationDetails() {
         System.out.println("\nCalculation Details:");
         System.out.printf("Hourly Rate: PHP %.2f%n", hourlyRate);
