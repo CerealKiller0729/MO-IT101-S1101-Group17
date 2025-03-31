@@ -30,14 +30,22 @@ public class Employee {
     private final LocalTime shiftStartTime;
     private final boolean nightShift;
 
+    // Decimal formatter for formatting numeric values
     private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+    // Default shift start time if not specified
     private static final LocalTime DEFAULT_SHIFT_START = LocalTime.of(8, 0);
 
+    /**
+     * Constructor to initialize Employee object using an array of data.
+     * @param data An array containing employee details.
+     */
     public Employee(String[] data) {
         if (data == null || data.length < 19) {
             throw new IllegalArgumentException("Insufficient data to create Employee object");
         }
 
+        // Parsing and assigning employee details
         this.employeeNumber = parseEmployeeNumber(data[0]);
         this.lastName = getValue(data, 1);
         this.firstName = getValue(data, 2);
@@ -61,6 +69,11 @@ public class Employee {
         this.nightShift = parseNightShift(getValue(data, 20));
     }
 
+    /**
+     * Parses and formats the employee number as an integer string.
+     * @param empNum The raw employee number input.
+     * @return The formatted employee number.
+     */
     private String parseEmployeeNumber(String empNum) {
         try {
             return String.valueOf((int) Double.parseDouble(empNum));
@@ -70,10 +83,21 @@ public class Employee {
         }
     }
 
+    /**
+     * Retrieves a value from the data array safely.
+     * @param data The employee data array.
+     * @param index The index of the required value.
+     * @return The value at the specified index or an empty string if out of bounds.
+     */
     private String getValue(String[] data, int index) {
         return (index < data.length) ? data[index].trim() : "";
     }
 
+    /**
+     * Parses a numeric value from a string, removing any non-numeric characters.
+     * @param value The raw string value.
+     * @return The parsed numeric value or 0.0 if parsing fails.
+     */
     private double parseDoubleValue(String value) {
         try {
             return Double.parseDouble(value.replaceAll("[^0-9.]", ""));
@@ -83,6 +107,11 @@ public class Employee {
         }
     }
 
+    /**
+     * Parses a shift start time from a string.
+     * @param timeString The raw time string.
+     * @return The parsed LocalTime or the default shift start time if parsing fails.
+     */
     private LocalTime parseShiftStartTime(String timeString) {
         try {
             return timeString.isEmpty() ? DEFAULT_SHIFT_START : LocalTime.parse(timeString);
@@ -92,11 +121,16 @@ public class Employee {
         }
     }
 
+    /**
+     * Parses the night shift status from a string.
+     * @param value The raw string value.
+     * @return True if the value is "true" (case-insensitive), otherwise false.
+     */
     private boolean parseNightShift(String value) {
         return "true".equalsIgnoreCase(value);
     }
 
-    // All getters
+    // Getter methods for all attributes
     public String getEmployeeNumber() { return employeeNumber; }
     public String getLastName() { return lastName; }
     public String getFirstName() { return firstName; }
@@ -125,9 +159,9 @@ public class Employee {
     }
 
     /**
-     * Returns a string representation of the employee
-     * @param detailed If true, returns full details; if false, returns basic info
-     * @return Formatted employee information
+     * Returns a formatted string representation of the employee.
+     * @param detailed If true, returns full details; if false, returns basic info.
+     * @return The formatted employee information.
      */
     public String toString(boolean detailed) {
         if (detailed) {
@@ -180,3 +214,4 @@ public class Employee {
         }
     }
 }
+        
